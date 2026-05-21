@@ -1,36 +1,40 @@
 # Stage 1: Build
 FROM node:18-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
+# Install dependencies
 COPY package.json package-lock.json ./
-
-# install ALL dependencies for build
 RUN npm ci
 
+# Copy source code
 COPY . .
 
-# update browserslist (optional)
-RUN npx update-browserslist-db@latest
-
-# build the app
-RUN npm run build
-
-
-# Stage 2: Production
-FROM node:18-alpine
-
-WORKDIR /app
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# copy built app
-COPY --from=builder /app ./
-
+# Set environment variables
 ENV NODE_ENV=production
 
-EXPOSE 5001
+# Build the frontend
+RUN npm run build
 
-USER appuser
+# Stage 2: Serve with Nginx
+FROM nginx:stable-alpine
 
-CMD ["npm", "start"]
+# Remove default Nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+#HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#  CMD curl -f http://localhost/ || exit 1
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
