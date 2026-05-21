@@ -18,12 +18,19 @@ const __dirname = path.resolve();
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.use(
   cors({
     origin: "*",
     credentials: true,
   })
 );
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "UP",
+  });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
