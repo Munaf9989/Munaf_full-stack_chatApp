@@ -10,15 +10,11 @@ export const generateToken = (userId, res) => {
     }
   );
 
-  const isProduction = process.env.NODE_ENV === "production";
-
   res.cookie("jwt", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    // In production (EKS behind ingress), cookies must be sameSite=none + secure=true
-    // so the browser sends them on cross-origin requests routed through the ingress.
-    sameSite: isProduction ? "none" : "lax",
-    secure: isProduction,
+    sameSite: "lax",
+    secure: false,
   });
 
   return token;

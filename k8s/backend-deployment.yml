@@ -29,9 +29,6 @@ spec:
           valueFrom:
             secretKeyRef:
               name: chatapp-secrets
-              key: jwt
+              key: jwt 
         - name: PORT
           value: "5001"
-        # Add your actual domain here so CORS allows it
-        - name: ALLOWED_ORIGINS
-          value: "http://chat-tws.com,https://chat-tws.com"
