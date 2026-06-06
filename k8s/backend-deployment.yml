@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: chatapp-backend
-        image: munafshaik/chatapp-backend:v1
+        image: munafshaik/chatapp-backend:v2
         ports:
         - containerPort: 5001
         env:
