@@ -1,0 +1,39 @@
+apiVersion: eksctl.io/v1alpha5            # eksctl cluster config API version
+kind: ClusterConfig                      # resource kind for eksctl
+metadata:                                # cluster metadata block
+  name: devsecops-eks               # EKS cluster name
+  region: us-east-1                     # AWS region for the cluster
+  version: "1.32"                        # Kubernetes control plane version
+  tags:                                  # tags to help identify resources
+    owner: Munaf               # tag owner
+    environment: training                 # tag environment
+    project: devsecops-demo         # tag project
+    purpose: lab                # tag purpose
+availabilityZones:                        # AZs for node placement
+  - us-east-1a                           # AZ 1
+  - us-east-1b                           # AZ 2
+iam:                                      # IAM/OIDC settings
+  withOIDC: true                         # enable IAM OIDC provider for IRSA
+managedNodeGroups:                        # defines managed node groups
+  - name: Chatapp-node-group            # node group name
+    instanceType: t3.medium                # EC2 instance type for workers
+    minSize: 2                            # minimum nodes in node group
+    maxSize: 2                            # maximum nodes in node group
+    desiredCapacity: 2                    # desired node count at creation
+    volumeSize: 20                        # root disk size (GiB)
+    privateNetworking: false              # nodes get public networking
+    ssh:                                  # SSH configuration
+      allow: true                         # allow SSH access to nodes
+      publicKeyName: Rasool_NV_Key        # EC2 key pair name for SSH
+    iam:                                  # per-node-group IAM settings
+      withAddonPolicies:                  # enable addon policies
+        autoScaler: true                  # allow cluster autoscaler usage
+        ebs: true                         # allow EBS volume usage
+        albIngress: true                  # allow ALB ingress addon
+        externalDNS: true                 # allow ExternalDNS addon
+    labels:                               # node labels for scheduling
+      owner: Munaf               # node label owner
+      app: devsecops-demo                 # node label app
+    tags:                                 # node-level tags
+      node-type: public-worker            # custom tag
+      managed-by: eksctl                  # managed by eksctl
