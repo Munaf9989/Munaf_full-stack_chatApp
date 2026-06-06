@@ -6,24 +6,36 @@ metadata:
   labels:
     name: chatapp-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    # Use capture group rewrite so /api/foo -> /api/foo (path preserved for backend)
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Forward cookies correctly
+    nginx.ingress.kubernetes.io/proxy-cookie-path: / /
 spec:
   rules:
   - host: chat-tws.com
     http:
       paths:
+      # API and socket.io go directly to backend service (bypasses nginx container)
+      - pathType: Prefix
+        path: "/api(/|$)(.*)"
+        backend:
+          service:
+            name: backend
+            port:
+              number: 5001
+      - pathType: Prefix
+        path: "/socket.io(/|$)(.*)"
+        backend:
+          service:
+            name: backend
+            port:
+              number: 5001
+      # All other traffic goes to frontend (nginx serves SPA)
       - pathType: Prefix
         path: "/"
         backend:
           service:
             name: frontend
-            port: 
+            port:
               number: 80
-      - pathType: Prefix
-        path: "/api"
-        backend:
-          service:
-            name: backend
-            port: 
-              number: 5001

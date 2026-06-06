@@ -19,12 +19,29 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 
+// CORS must allow the frontend origin with credentials.
+// 'origin: true' reflects the request origin, which works but is permissive.
+// In production, restrict to your actual domain.
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:5173", "http://localhost:5001"];
+
 app.use(
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g. mobile apps, curl) or from allowed origins
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+
+// Trust the ingress/proxy so Express sees the real client IP and protocol
+app.set("trust proxy", 1);
 
 app.get("/health", (req, res) => {
   res.status(200).json({
