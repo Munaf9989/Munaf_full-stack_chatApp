@@ -87,7 +87,7 @@ pipeline {
 
                     git diff --cached --quiet || git commit -m "Update frontend:${params.FRONTEND_DOCKER_TAG} backend:${params.BACKEND_DOCKER_TAG}"
 
-                    git push origin main
+                    git push origin HEAD:main
                     """
                 }
             }
@@ -98,13 +98,13 @@ pipeline {
             emailext(
                 attachLog: true,
                 from: 'abdulmunaf9704@gmail.com',
-                subject: "Petclinic CD Success - ${currentBuild.result}",
+                subject: "ChatApp CD Success - ${currentBuild.result}",
                 to: 'abdulmunaf9704@gmail.com',
                 mimeType: 'text/html',
                 body: """
                 <html>
                 <body>
-                    <h3 style="color:green;">Petclinic Application Updated Successfully</h3>
+                    <h3 style="color:green;">ChatApp Application Updated Successfully</h3>
                     <p><b>Job:</b> ${env.JOB_NAME}</p>
                     <p><b>Build:</b> ${env.BUILD_NUMBER}</p>
                     <p><b>URL:</b> ${env.BUILD_URL}</p>
@@ -119,13 +119,13 @@ pipeline {
             emailext(
                 attachLog: true,
                 from: 'abdulmunaf9704@gmail.com',
-                subject: "Petclinic CD Failed - ${currentBuild.result}",
+                subject: "ChatApp CD Failed - ${currentBuild.result}",
                 to: 'abdulmunaf9704@gmail.com',
                 mimeType: 'text/html',
                 body: """
                 <html>
                 <body>
-                    <h3 style="color:red;">Petclinic CD Pipeline Failed</h3>
+                    <h3 style="color:red;">ChatApp CD Pipeline Failed</h3>
                     <p><b>Job:</b> ${env.JOB_NAME}</p>
                     <p><b>Build:</b> ${env.BUILD_NUMBER}</p>
                 </body>
