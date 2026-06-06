@@ -1,0 +1,137 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Docker tag from CI job for CD pipeline')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+    }
+
+    stages {
+        stage("Validate Parameters") {
+            steps {
+                script {
+                    if (params.FRONTEND_DOCKER_TAG == '' || params.BACKEND_DOCKER_TAG == '') {
+                        error("FRONTEND_DOCKER_TAG and BACKEND_DOCKER_TAG must be provided.")
+                    }
+                }
+            }
+        }
+        
+        stage('Git_SCM_checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                            branches: [[name: 'main']],
+                            userRemoteConfigs: [[url: 'https://github.com/Munaf9989/Munaf_full-stack_chatApp.git', credentialsId: 'Munaf_Git_Credentials']],
+                              extensions: [
+                                [$class: 'CleanBeforeCheckout']
+                            ]])
+                echo 'Git checkout completed successfully.'
+            }
+            post {
+                failure {
+                    echo 'Git checkout failed.'
+                }
+                success {
+                    echo 'Git checkout succeeded.'
+                }
+            }
+        }
+
+        stage('Verify: Docker Image Tag') {
+            steps {
+                echo "FRONTEND_DOCKER_TAG = ${params.FRONTEND_DOCKER_TAG}"
+                echo "BACKEND_DOCKER_TAG = ${params.BACKEND_DOCKER_TAG}"
+            }
+        }
+        stage('Update Kubernetes Manifests') {
+            steps {
+                dir('k8s') {
+                    sh """
+                    sed -i 's|image: munafshaik/chatapp-frontend:.*|image: munafshaik/chatapp-frontend:${params.FRONTEND_DOCKER_TAG}|' frontend-deployment.yml
+
+                    sed -i 's|image: munafshaik/chatapp-backend:.*|image: munafshaik/chatapp-backend:${params.BACKEND_DOCKER_TAG}|' backend-deployment.yml
+                    """
+                }
+            }
+        }
+
+        stage('Print Kubernetes Manifests') {
+            steps {
+                dir('k8s') {
+                    sh '''
+                    echo "===== FRONTEND DEPLOYMENT ====="
+                    cat frontend-deployment.yml
+
+                    echo ""
+                    echo "===== BACKEND DEPLOYMENT ====="
+                    cat backend-deployment.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Git Commit & Push Changes') {
+            steps {
+                withCredentials([
+                    gitUsernamePassword(
+                        credentialsId: 'Munaf_Git_Credentials',
+                        gitToolName: 'Default'
+                    )
+                ]) {
+                    sh """
+                    git config user.email "jenkins@ci.local"
+                    git config user.name "Jenkins CI"
+
+                    git add k8s/frontend-deployment.yml
+                    git add k8s/backend-deployment.yml
+
+                    git diff --cached --quiet || git commit -m "Update frontend:${params.FRONTEND_DOCKER_TAG} backend:${params.BACKEND_DOCKER_TAG}"
+
+                    git push origin main
+                    """
+                }
+            }
+        } 
+      }
+    post {
+        success {
+            emailext(
+                attachLog: true,
+                from: 'abdulmunaf9704@gmail.com',
+                subject: "Petclinic CD Success - ${currentBuild.result}",
+                to: 'abdulmunaf9704@gmail.com',
+                mimeType: 'text/html',
+                body: """
+                <html>
+                <body>
+                    <h3 style="color:green;">Petclinic Application Updated Successfully</h3>
+                    <p><b>Job:</b> ${env.JOB_NAME}</p>
+                    <p><b>Build:</b> ${env.BUILD_NUMBER}</p>
+                    <p><b>URL:</b> ${env.BUILD_URL}</p>
+                    <p><b>Image Tag:</b> ${params.FRONTEND_DOCKER_TAG}</p>
+                </body>
+                </html>
+                """
+            )
+        }
+
+        failure {
+            emailext(
+                attachLog: true,
+                from: 'abdulmunaf9704@gmail.com',
+                subject: "Petclinic CD Failed - ${currentBuild.result}",
+                to: 'abdulmunaf9704@gmail.com',
+                mimeType: 'text/html',
+                body: """
+                <html>
+                <body>
+                    <h3 style="color:red;">Petclinic CD Pipeline Failed</h3>
+                    <p><b>Job:</b> ${env.JOB_NAME}</p>
+                    <p><b>Build:</b> ${env.BUILD_NUMBER}</p>
+                </body>
+                </html>
+                """
+            )
+        }
+    }  
+    }
