@@ -7,8 +7,14 @@ If this **repository** helps you, give it a ⭐ to show your support and help ot
 
 ---
 
+## ⭐ Follow the below refferences for complete and environment steup and for application
+If this **repository** helps you, give it a ⭐ to show your support and help others discover it!
+
+---
+
 ## **Table of Contents**
 
+* [Credits & Acknowledgements](#credits--acknowledgements)
 * [Introduction](#introduction)
 * [Tech Stack](#tech-stack)
 * [Architecture Overview](#architecture-overview)
@@ -37,6 +43,41 @@ If this **repository** helps you, give it a ⭐ to show your support and help ot
 
 ---
 
+# **Credits & Acknowledgements**
+
+This project is built by combining the work of two excellent YouTubers and educators. Full credit goes to them for the foundational content used in this repository.
+
+---
+
+### 🛠️ Environment Setup & CI/CD Pipeline — CloudWithVarJosh
+
+The complete DevSecOps environment setup, Jenkins CI/CD pipeline architecture, SonarQube integration, Trivy scanning, ArgoCD, and EKS deployment strategy in this project is based on **Project 01** from the **Jenkins – Basics to Production** series by [CloudWithVarJosh](https://github.com/CloudWithVarJosh).
+
+* **GitHub (Project 01):** [https://github.com/CloudWithVarJosh/Jenkins-Basics-To-Production.git](https://github.com/CloudWithVarJosh/Jenkins-Basics-To-Production.git)
+* **YouTube Channel:** [CloudWithVarJosh on YouTube](https://www.youtube.com/@CloudWithVarJosh)
+
+The Jenkins Basics to Production series covers everything from fundamentals to production-grade CI/CD pipelines, Jenkinsfiles, multi-branch pipelines, and real-world DevOps/SRE practices. If you want to understand any part of the pipeline setup in this repo, that series is the place to start.
+
+---
+
+### 💬 Application — LondheShubham153 (Shubham Londhe)
+
+The full-stack chat application (**Chatty**) used in this project is sourced from the repository by [LondheShubham153](https://github.com/LondheShubham153), which is a fork of the original by [iemafzalhassan](https://github.com/iemafzalhassan).
+
+* **GitHub (Application):** [https://github.com/LondheShubham153/full-stack_chatApp](https://github.com/LondheShubham153/full-stack_chatApp)
+* **YouTube Channel:** [Train With Shubham on YouTube](https://www.youtube.com/@TrainWithShubham)
+
+The application is a scalable, real-time chat experience built with React (frontend), Node.js/Express (backend), and MongoDB. It supports real-time messaging via WebSockets, user authentication, and online presence indicators.
+
+---
+
+> **Note:** This repository is a personal learning project. The pipeline setup and the application were taken from the above sources and combined together for hands-on DevSecOps practice. All intellectual credit belongs to the original authors.
+
+---
+
+
+---
+
 # **Introduction**
 
 This project implements a **production-grade DevSecOps CI/CD pipeline** for a full-stack real-time chat application called **Chatty**. The application consists of a React frontend and a Node.js backend, backed by MongoDB.
@@ -62,7 +103,7 @@ The pipeline reflects **real-world production DevSecOps patterns** used by moder
 | Backend | Node.js / Express |
 | Database | MongoDB |
 | CI/CD | Jenkins (CI + CD pipelines) |
-| SAST | SonarQube Community |
+| SAST | SonarQube |
 | SCA / Image Scan | Trivy |
 | Container Registry | Docker Hub |
 | GitOps | ArgoCD |
@@ -78,7 +119,7 @@ The high-level flow is:
 1. Developer pushes code to GitHub
 2. Jenkins CI pipeline triggers automatically
 3. Code is scanned (Trivy FS), built, and analyzed (SonarQube)
-4. Docker images for frontend and backend are built and pushed to Docker Hub
+4. Docker images for frontend and backend are built and get trivy scan and pushed to Docker Hub
 5. Jenkins CD pipeline updates Kubernetes manifests with the new image tags
 6. ArgoCD detects the change in the Git repo and syncs the application to EKS
 
@@ -92,16 +133,20 @@ The CI pipeline runs on every push/commit and includes the following stages:
 
 1. **Validate Parameters** — Validates input parameters
 2. **Git SCM Checkout** — Clones the source repository
-3. **Trivy Scan** — Filesystem-level SCA scan for the whole repo
-4. **Frontend Trivy Scan** — Targeted scan on the frontend directory
-5. **Backend Trivy Scan** — Targeted scan on the backend directory
-6. **SonarQube Analysis** — Runs SonarQube server analysis
-7. **Frontend Sonar Scan** — Frontend-specific SAST analysis
-8. **Backend Sonar Scan** — Backend-specific SAST analysis
-9. **Quality Gates** — Enforces SonarQube quality gate (fails pipeline on breach)
-10. **Docker Build & Push** — Builds and pushes frontend and backend images to Docker Hub
+3. **Trivy Scan** — Filesystem-level SCA scan for the whole repo \
+   **Frontend Trivy Scan** — Targeted scan on the frontend directory \
+   **Backend Trivy Scan** — Targeted scan on the backend directory
+4. **SonarQube Analysis** — Runs SonarQube server analysis \
+   **Frontend Sonar Scan** — Frontend-specific SAST analysis \
+   **Backend Sonar Scan** — Backend-specific SAST analysis
+5. **Quality Gates** — Enforces SonarQube quality gate (fails pipeline on breach)
+6. **Docker Build** — Builds frontend and backend images
+7. **Trivy Image Scan** — Targeted scan on the frontend and backend images
+8. **Docker Push** — Pushes frontend and backend images to Docker Hub
 
 ![Chat-App-CI Pipeline](images/Chatapp-CI.png)
+
+![Chat-App-CI Pipeline](images/chatapp-ci2.png)
 
 ---
 
