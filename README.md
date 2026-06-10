@@ -2,16 +2,6 @@
 
 ---
 
-## ⭐ Support the Project
-If this **repository** helps you, give it a ⭐ to show your support and help others discover it!
-
----
-
-## ⭐ Follow the below refferences for complete and environment steup and for application
-If this **repository** helps you, give it a ⭐ to show your support and help others discover it!
-
----
-
 ## **Table of Contents**
 
 * [Credits & Acknowledgements](#credits--acknowledgements)
@@ -40,6 +30,10 @@ If this **repository** helps you, give it a ⭐ to show your support and help ot
 * [How to Improve This Pipeline](#how-to-improve-this-pipeline)
 * [Conclusion](#conclusion)
 * [References](#references)
+
+---
+
+## ⭐ Follow the below refferences for complete and environment steup and for application
 
 ---
 
